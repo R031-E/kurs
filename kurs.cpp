@@ -321,6 +321,7 @@ void SortByNumber(Flight Plane, Node*& Head)
 		cout << "Недостаточно элементов для сортировки.\n";
 		return;
 	}
+	Flight store;
 	Node* tmp = Head;
 	bool flag = 1;
 	int k;
@@ -331,7 +332,10 @@ void SortByNumber(Flight Plane, Node*& Head)
 		{
 			if (tmp->data.number > tmp->next->data.number)
 			{
-				swap(tmp->data, tmp->next->data);
+				store = tmp->next->data;
+				tmp->next->data = tmp->data;
+				tmp->data = store;
+				/*swap(tmp->data, tmp->next->data);*/
 				flag = 1;
 				k++;
 			}

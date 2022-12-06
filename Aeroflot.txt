@@ -1,10 +1,9 @@
-1234f|SPB|sdfsfsdf;
-3566|SPB|Sukhoi_SuperJet_100;
-1255|SPB|Sukhoi_SuperJet_100;
-3484|SPB|Airbus_A321;
-4254|SPB|Airbus_A330;
-8000|SPB|Airbus_A321;
-3545|SPB|Sukhoi_SuperJet_100;
-1269|SPB|Airbus_A330;
-1232|Абу|Boeing 777-300ER;
+1232|Абу-Даби|Boeing 777-300ER;
 1233|Мытищи|Boeing 737-800;
+1255|Лондон|Boeing 777-300ER;
+1269|Осло|Airbus А330-300;
+3545|Краснодар|Boeing 777-300ER;
+3566|Красноярск|Boeing 777-300ER;
+4254|Нью-Йорк|Boeing 777-300ER;
+4785|Ярославль|Airbus А321;
+8000|Москва|Boeing 777-300ER;
