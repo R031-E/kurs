@@ -325,7 +325,13 @@ void SortByNumber(Flight Plane, Node*& Head)
 		{
 			if (tmp->data.number > tmp->next->data.number)
 			{
-				swap(tmp->data, tmp->next->data);
+				store = tmp->next->data;
+				tmp->next->data = tmp->data;
+				tmp->data = store;
+				/*swap(tmp->data, tmp->next->data);*/
+				/*swap(tmp->data, tmp->next->data);*/
+				tmp->data = store;
+				/*swap(tmp->data, tmp->next->data);*/
 				flag = 1;
 				k++;
 			}
