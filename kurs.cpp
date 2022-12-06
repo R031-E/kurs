@@ -45,19 +45,25 @@ int check_number_unique(string& number, Node*& Head)
 		size = number.size();
 	}
 	num = stoi(number);
-	while (tmp)
+	try 
 	{
-		if (num == tmp->data.number)
+		while (tmp)
 		{
-			cout << "Номер рейса не уникален, введите другой номер" << endl;
-			cin.clear();
-			cin.ignore(cin.rdbuf()->in_avail());
-			cin >> number;
-			check_number_unique(number, Head);
+			if (num == tmp->data.number)
+			{
+				cout << "Номер рейса не уникален, введите другой номер" << endl;
+				cin.clear();
+				cin.ignore(cin.rdbuf()->in_avail());
+				cin >> number;
+				throw exception();
+			}
+			tmp = tmp->next;
 		}
-		tmp = tmp->next;
 	}
-
+	catch (exception& ex) 
+	{
+		check_number_unique(number, Head);
+	}
 	return stoi(number);
 }
 
@@ -363,12 +369,12 @@ void SearchDestinations(Flight Plane, Node*& Head)
 void ShowFlights(Flight Plane, Node*& Head, Node*& Tail)
 {
 	Node* tmp = Head;
-	cout << "\n| " << " Номер рейса " << " | " << "Пункт прибытия" << " | " << "    Тип самолёта    " << " |\n" << "|---------------|----------------|----------------------|\n";
+	cout << "\n| " << " Номер рейса " << " | " << "Пункт прибытия" << " | " << "    Тип самолёта    " << " |\n" << "+---------------+----------------+----------------------+\n";
 	while (tmp) 
 	{
 		cout << "| " << setw(13) << tmp->data.number << " | " << setw(14) << tmp->data.destination << " | "
 			<< setw(20) << tmp->data.plane_type << " |" << endl;
-		cout << "|---------------|----------------|----------------------|" << endl;
+		cout << "+---------------+----------------+----------------------+" << endl;
 		tmp = tmp->next;
 	}
 }
@@ -391,87 +397,159 @@ void ReadHelp(Flight Plane, Node*& Head, Node*& Tail)
 	}
 }
 
-void Read(Flight Plane, Node*& Head, Node*& Tail)
+void Read(Flight Plane, Node*& Head, Node*& Tail, string inpath)
 {
 	Node* tmp = Head;
-	ifstream read_file("Aeroflot.txt");
+	ifstream read_file;
+	read_file.open(inpath + ".txt");
 	string str, num, dest, typ;
+	string Boeing1 = "Boeing 777-300ER",
+		Boeing2 = "Boeing 737-800",
+		Airbus1 = "Airbus A350-900",
+		Airbus2 = "Airbus А330-300",
+		Airbus3 = "Airbus А321";
 	Flight obj;
-	char txt[150];
 	int x;
 	if (!read_file.is_open())
 	{
-		cout << "Файл не существует.\n";
+		cout << "Файл не существует." << endl;
 		return;
 	}
-	else
+	do
 	{
-		do {
-			read_file.getline(txt, 150);
-			for (int i = 0; i < 150; i++)
+		getline(read_file, str);
+
+		if (str.size() == 0)
+			continue;
+
+		int stick = 0;
+		int dot = 0;
+		int ind = 0;
+		while (ind < str.size())
+		{
+			if (str[ind] == '|')
 			{
-				str += txt[i];
+				stick++;
 			}
-			x = 0;
-			while (str[x] != '|')
+			if (str[ind] == ';')
 			{
-				num += str[x];
-				x++;
-				Plane.number = atoi(num.c_str());
+				dot++;
 			}
-			x++;
-			while (str[x] != '|')
-			{
-				dest += str[x];
-				x++;
-				Plane.destination = dest;
-			}
-			x++;
-			while (str[x] != ';')
-			{
-				typ += str[x];
-				x++;
-				Plane.plane_type = typ;
-			}
-			x++;
-			//while (str[x] != '\n') 
-			//{
-			//	typ += str[x];
-			//	x++;
-			//	ThePlane.type = atoi(typ.c_str());
-			//}
-			//x++;
-			ReadHelp(Plane, Head, Tail);
+			ind++;
+		}
+		if (stick != 2 || dot != 1)
+		{
+			ind = 0;//обнуляем индекс для строки
 			str.clear();
 			num.clear();
 			dest.clear();
 			typ.clear();
-		} while (!read_file.eof());
-		cout << endl << "База данных загружена" << endl << endl;
-		read_file.close();
-	}
+			continue;
+		}
+
+		x = 0;
+		while (str[x] != '|')
+		{
+			num += str[x];
+			x++;
+		}
+		if (num.size() < 4 || num.size() > 4 || (num.find_first_not_of("0123456789") == string::npos) == false)
+		{
+			cout << "Рейс " << str << " не был добавлен, так как имеет ошибки в полях\n";
+			num.clear();
+			dest.clear();
+			typ.clear();
+			continue;
+		}
+
+		x++;
+		while (str[x] != '|')
+		{
+			dest += str[x];
+			x++;
+		}
+		if ((dest.find_first_not_of("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя-") == string::npos) == false)
+		{
+			cout << "Рейс " << str << " не был добавлен, так как имеет ошибки в полях\n";
+			num.clear();
+			dest.clear();
+			typ.clear();
+			continue;
+		}
+
+		x++;
+		while (str[x] != ';')
+		{
+			typ += str[x];
+			x++;
+		}
+		if (typ != Boeing1 && typ != Boeing2 && typ != Airbus1 && typ != Airbus2 && typ != Airbus3)
+		{
+			cout << "Рейс " << str << " не был добавлен, так как имеет ошибки в полях\n";
+			num.clear();
+			dest.clear();
+			typ.clear();
+			continue;
+		}
+		x++;
+
+		Plane.number = stoi(num);
+		Plane.destination = dest;
+		Plane.plane_type = typ;
+		ReadHelp(Plane, Head, Tail);
+		str.clear();
+		num.clear();
+		dest.clear();
+		typ.clear();
+	} while (!read_file.eof());
+	cout << endl << "База данных загружена" << endl << endl;
+	read_file.close();
 }
 
-void Record(Flight Plane, Node*& Head)
+void Record(Flight Plane, Node*& Head, string& inpath, string& outpath)
 {
 	Node* tmp = Head;
 	ofstream record_file;
-	record_file.open("Aeroflot.txt");
-	if (!record_file.is_open()) 
+	if (outpath != inpath)
 	{
-		cout << "Не удалось открыть файл.\n";
-		return;
-	}
-	else 
-	{
-		while (tmp != 0)
+		record_file.open(outpath + ".txt", ofstream::app);
+		if (!record_file.is_open())
 		{
-			record_file << tmp->data.number << "|" << tmp->data.destination
-				<< "|" << tmp->data.plane_type << ";\n";
-			tmp = tmp->next;
+			cout << "Не удалось открыть файл.\n";
+			return;
 		}
-		cout << endl << "Таблица была сохранена" << endl << endl;
+		else
+		{
+			while (tmp)
+			{
+				record_file << tmp->data.number << "|" << tmp->data.destination
+					<< "|" << tmp->data.plane_type << ";" << endl;
+				tmp = tmp->next;
+			}
+			cout << endl << "Таблица была сохранена" << endl << endl;
+		}
 	}
+	else
+	{
+		record_file.open(outpath + ".txt");
+		if (!record_file.is_open())
+		{
+			cout << "Не удалось открыть файл.\n";
+			return;
+		}
+		else
+		{
+			while (tmp)
+			{
+				record_file << tmp->data.number << "|" << tmp->data.destination
+					<< "|" << tmp->data.plane_type << ";" << endl;
+				tmp = tmp->next;
+			}
+			cout << endl << "Таблица была сохранена" << endl << endl;
+		}
+	}
+	record_file.close();
+	inpath = "";
 }
 
 int main() 
@@ -482,21 +560,13 @@ int main()
 	Node* Head = NULL;
 	Node* Tail = NULL;
 	Flight Plane;
+	string outpath, inpath = "";
 	int menu;
 
 	do
 	{
-		cout << "1) Добавить рейс" << endl;
-		cout << "2) Редактировать рейс" << endl;
-		cout << "3) Удалить рейс" << endl;
-		cout << "4) Поиск рейсов по пункту назначения" << endl;
-		cout << "5) Показать все рейсы" << endl;
-		cout << "6) Сортировка по номеру рейса" << endl;
-		cout << "7) Сохранить всё в базу данных" << endl;
-		cout << "8) Загрузить из базы данных" << endl;
-		cout << "0) Выход" << endl;
-		cout << "Введите цифру для выбора необходимого действия: " << endl;
-
+		cout << "1) Добавить рейс\n2) Редактировать рейс\n3) Удалить рейс\n4) Поиск рейсов по пункту назначения\n5) Показать все рейсы\n6) Сортировка по номеру рейса\n7) Сохранить всё в базу данных\n";
+		cout << "8) Загрузить из базы данных\n0) Выход\nВведите цифру соответствующую нужной опции: ";
 		cin >> menu;
 		check_menu(menu);
 		system("cls");
@@ -535,12 +605,16 @@ int main()
 		}
 		case 7:
 		{
-			Record(Plane, Head);
+			cout << "Введите имя файла: ";
+			cin >> outpath;
+			Record(Plane, Head, outpath, inpath);
 			break;
 		}
 		case 8:
 		{
-			Read(Plane, Head, Tail);
+			cout << "Введите имя файла: ";
+			cin >> inpath;
+			Read(Plane, Head, Tail, inpath);
 			break;
 		}
 		case 0:
