@@ -84,7 +84,7 @@ int check_number(string& number)
 
 void check_menu(int& menu)
 {
-	while (cin.fail() || cin.get() != '\n' || menu < 0 || menu > 8)
+	while (cin.fail() || cin.get() != '\n' || menu < 0 || menu > 9)
 	{
 		cin.clear();
 		cin.ignore(cin.rdbuf()->in_avail());
@@ -314,6 +314,23 @@ void DeleteFlight(Flight Plane, Node*& Head, Node*& Tail)
 	return;
 }
 
+void ClearList(Flight Plane, Node*& Head, Node*& Tail) 
+{
+	if (!Head)
+	{
+		cout << "В приложении нет таблицы.\n";
+		return;
+	}
+
+	while (Head)
+	{
+		Node* jump = Head->next;
+		delete Head;
+		Head = jump;
+	}
+	Tail = NULL;
+}
+
 void SortByNumber(Flight Plane, Node*& Head)
 {
 	if (Head == NULL || Head->next == NULL)
@@ -335,7 +352,6 @@ void SortByNumber(Flight Plane, Node*& Head)
 				store = tmp->next->data;
 				tmp->next->data = tmp->data;
 				tmp->data = store;
-				/*swap(tmp->data, tmp->next->data);*/
 				flag = 1;
 				k++;
 			}
@@ -352,6 +368,11 @@ void SortByNumber(Flight Plane, Node*& Head)
 
 void SearchDestinations(Flight Plane, Node*& Head)
 {
+	if (!Head)
+	{
+		cout << "В приложении нет таблицы.\n";
+		return;
+	}
 	bool flag = 0;
 	Node* tmp = Head;
 	string des;
@@ -372,6 +393,11 @@ void SearchDestinations(Flight Plane, Node*& Head)
 
 void ShowFlights(Flight Plane, Node*& Head, Node*& Tail)
 {
+	if (!Head)
+	{
+		cout << "В приложении нет таблицы.\n";
+		return;
+	}
 	Node* tmp = Head;
 	cout << "\n| " << " Номер рейса " << " | " << "Пункт прибытия" << " | " << "    Тип самолёта    " << " |\n" << "+---------------+----------------+----------------------+\n";
 	while (tmp) 
@@ -443,7 +469,7 @@ void Read(Flight Plane, Node*& Head, Node*& Tail, string inpath)
 		}
 		if (stick != 2 || dot != 1)
 		{
-			ind = 0;//обнуляем индекс для строки
+			ind = 0;
 			str.clear();
 			num.clear();
 			dest.clear();
@@ -510,7 +536,7 @@ void Read(Flight Plane, Node*& Head, Node*& Tail, string inpath)
 	read_file.close();
 }
 
-void Record(Flight Plane, Node*& Head, string& inpath, string& outpath)
+void Record(Flight Plane, Node*& Head, string& outpath, string& inpath)
 {
 	Node* tmp = Head;
 	ofstream record_file;
@@ -553,7 +579,6 @@ void Record(Flight Plane, Node*& Head, string& inpath, string& outpath)
 		}
 	}
 	record_file.close();
-	inpath = "";
 }
 
 int main() 
@@ -570,7 +595,7 @@ int main()
 	do
 	{
 		cout << "1) Добавить рейс\n2) Редактировать рейс\n3) Удалить рейс\n4) Поиск рейсов по пункту назначения\n5) Показать все рейсы\n6) Сортировка по номеру рейса\n7) Сохранить всё в базу данных\n";
-		cout << "8) Загрузить из базы данных\n0) Выход\nВведите цифру соответствующую нужной опции: ";
+		cout << "8) Загрузить из базы данных\n9) Очистить таблицу\n0) Выход\nВведите цифру соответствующую нужной опции: ";
 		cin >> menu;
 		check_menu(menu);
 		system("cls");
@@ -609,6 +634,11 @@ int main()
 		}
 		case 7:
 		{
+			if (!Head)
+			{
+				cout << "В приложении нет таблицы для сохранения.\n";
+				break;
+			}
 			cout << "Введите имя файла: ";
 			cin >> outpath;
 			Record(Plane, Head, outpath, inpath);
@@ -619,6 +649,11 @@ int main()
 			cout << "Введите имя файла: ";
 			cin >> inpath;
 			Read(Plane, Head, Tail, inpath);
+			break;
+		}
+		case 9:
+		{
+			ClearList(Plane, Head, Tail);
 			break;
 		}
 		case 0:
