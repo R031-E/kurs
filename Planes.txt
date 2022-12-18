@@ -1,0 +1,6 @@
+Boeing 777-300ER;
+Boeing 737-800;
+Airbus A350-900;
+Airbus A330-300;
+Airbus A321;
+SuperJet;

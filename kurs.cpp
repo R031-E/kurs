@@ -30,56 +30,41 @@ struct Node
 	Node* prev;
 };
 
-#pragma region checks
-int check_number_unique(string& number, Node*& Head)
+struct Planes 
 {
+	string plane;
+	Planes* Next;
+};
+
+const string planes[] = { "Boeing 777-300ER", "Boeing 737-800", "Airbus A350-900", "Airbus A330-300", "Airbus A321" };
+
+#pragma region checks
+bool check_unique(string& number, Node*& Head)
+{
+	bool flag = 0;
+	int num = stoi(number);
 	Node* tmp = Head;
-	int size, num;
-	size = number.size();
-	while (cin.fail() || size > 4 || size < 4 || (number.find_first_not_of("0123456789") == string::npos) == false)
+	while (tmp)
 	{
-		cin.clear();
-		cin.ignore(cin.rdbuf()->in_avail());
-		cout << "Номер рейса должен содержать 4 цифры: " << endl;
-		cin >> number;
-		size = number.size();
-	}
-	num = stoi(number);
-	try 
-	{
-		while (tmp)
+		if (num == tmp->data.number)
 		{
-			if (num == tmp->data.number)
-			{
-				cout << "Номер рейса не уникален, введите другой номер" << endl;
-				cin.clear();
-				cin.ignore(cin.rdbuf()->in_avail());
-				cin >> number;
-				throw exception();
-			}
-			tmp = tmp->next;
+		flag = 1;
+		return false;
 		}
+	tmp = tmp->next;
 	}
-	catch (exception& ex) 
-	{
-		check_number_unique(number, Head);
-	}
-	return stoi(number);
+	if (flag == 0) return true;
 }
 
-int check_number(string& number)
+bool check_number(string& number)
 {
-	int size, num;
+	int size;
 	size = number.size();
-	while (cin.fail() || size > 4 || size < 4 || (number.find_first_not_of("0123456789") == string::npos) == false)
+	if (size > 4 || size < 4 || (number.find_first_not_of("0123456789") == string::npos) == false)
 	{
-		cin.clear();
-		cin.ignore(cin.rdbuf()->in_avail());
-		cout << "Номер рейса должен содержать 4 цифры: " << endl;
-		cin >> number;
-		size = number.size();
+		return false;
 	}
-	return stoi(number);
+	else return true;
 }
 
 void check_menu(int& menu)
@@ -93,6 +78,18 @@ void check_menu(int& menu)
 	}
 }
 
+void check_choice(int& option)
+{
+	while (cin.fail() || cin.get() != '\n' || option < 0 || option > 1)
+	{
+		cin.clear();
+		cin.ignore(cin.rdbuf()->in_avail());
+		cout << "\nНеверный ввод. Повторите: ";
+		cin >> option;
+	}
+}
+
+
 void check_option(int& menu)
 {
 	while (cin.fail() || cin.get() != '\n' || menu < 1 || menu > 5)
@@ -104,55 +101,92 @@ void check_option(int& menu)
 	}
 }
 
-void check_destination(string& dest)
+bool check_destination(string& dest)
 {
-	while ((dest.find_first_not_of("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя-") == string::npos) == false)
+	if ((dest.find_first_not_of("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя- ") == string::npos) == false)
+	{
+		return false;
+	}
+	else return true;
+}
+
+bool check_planes_unique(string& type, Planes*& Start)
+{
+	bool flag = 0;
+	Planes* tmp = Start;
+	while (tmp)
+	{
+		if (type == tmp->plane)
+		{
+			flag = 1;
+			return false;
+		}
+		tmp = tmp->Next;
+	}
+	if (flag == 0) return true;
+}
+
+bool check_plane(string& type)
+{
+	if ((type.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-0123456789 ") == string::npos) == false)
+	{
+		return false;
+	}
+	else return true;
+}
+#pragma endregion checks
+
+void ShowPlanes(Planes*& Start)
+{
+	Planes* temporary = Start;
+	while (temporary)
+	{
+		cout << "-- " << temporary->plane << endl;
+		temporary = temporary->Next;
+	}
+}
+
+void AddFlight(Flight Plane, Node*& Head, Node*& Tail, Planes*& Start)
+{
+	string number, dest, type;
+	int option, size;
+	cout << "Введите номер рейса в формате 0001: ";
+	cin >> number;
+	while (check_number(number) == false || check_unique(number, Head) == false)
+	{
+		cin.clear();
+		cin.ignore(cin.rdbuf()->in_avail());
+		cout << "Номер рейса должен содержать 4 цифры и быть уникальным: " << endl;
+		cin >> number;
+	}
+	Plane.number = stoi(number);
+	cout << "\nВведите пункт назначения: ";
+	getline(cin >> ws, dest);
+	while (check_destination(dest) == false)
 	{
 		cin.clear();
 		cin.ignore(cin.rdbuf()->in_avail());
 		cout << "Пункт назначения не должен содержать цифр и специальных знаков: " << endl;
-		cin >> dest;
+		getline(cin >> ws, dest);
 	}
-}
-#pragma endregion checks
-
-void AddFlight(Flight Plane, Node *& Head, Node*& Tail) 
-{
-	string number;
-	int option, size;
-	cout << "Введите номер рейса в формате 0001: ";
-	cin >> number;
-	Plane.number = check_number_unique(number, Head);
-	cout << "\nВведите пункт назначения: ";
-	cin >> Plane.destination;
-	check_destination(Plane.destination);
-	cout << "\nВыберите тип самолета: \n1) Boeing 777-300ER\n2) Boeing 737-800\n3) Airbus A350-900\n4) Airbus А330-300\n5) Airbus А321\n";
-	cin >> option;
-	check_option(option);
-	switch (option) 
+	Plane.destination = dest;
+	cout << "\nВведите имя нужного типа самолета:\n";
+	ShowPlanes(Start);
+	getline(cin >> ws, type);
+	while (check_planes_unique(type, Start) == true)
 	{
-	case 1:
-		Plane.plane_type = "Boeing 777-300ER";
-		break;
-	case 2:
-		Plane.plane_type = "Boeing 737-800";
-		break;
-	case 3:
-		Plane.plane_type = "Airbus A350-900";
-		break;
-	case 4:
-		Plane.plane_type = "Airbus А330-300";
-		break;
-	case 5:
-		Plane.plane_type = "Airbus А321";
-		break;
+		cin.clear();
+		cin.ignore(cin.rdbuf()->in_avail());
+		cout << "Такой самолет отсутсвует в базе, повторите ввод: " << endl;
+		getline(cin >> ws, type);
 	}
+	Plane.plane_type = type;
 	Node* NewElem = new Node;
 	NewElem->next = NULL;
 	NewElem->data = Plane;
 	if (Head == NULL)
 	{
-		NewElem->prev = NULL; 
+		NewElem->prev = NULL;
 		Head = Tail = NewElem;
 	}
 	else
@@ -164,7 +198,7 @@ void AddFlight(Flight Plane, Node *& Head, Node*& Tail)
 	cout << "Рейс добавлен.\n";
 }
 
-void EditFlight(Flight Plane, Node*& Head)
+void EditFlight(Flight Plane, Node*& Head, Planes*& Start)
 {
 	Node* othertmp = Head;
 	Node* tmp = Head;
@@ -176,10 +210,17 @@ void EditFlight(Flight Plane, Node*& Head)
 	bool flag = 0;
 	int num, var, p_t, size;
 	string numb = "";
+	string type;
 	cout << endl << "Введите номер рейса (4 цифры), который необходимо редактировать: " << endl;
 	cin >> numb;
-	num = check_number(numb);
-
+	while (check_number(numb) == false)
+	{
+		cin.clear();
+		cin.ignore(cin.rdbuf()->in_avail());
+		cout << "Номер рейса должен содержать 4 цифры: " << endl;
+		cin >> numb;
+	}
+	num = stoi(numb);
 	while (tmp)
 	{
 		if (tmp->data.number == num)
@@ -214,42 +255,43 @@ void EditFlight(Flight Plane, Node*& Head)
 			{
 				cout << "Введите новый номер рейса: " << endl;
 				cin >> numb;
-				num = check_number_unique(numb, Head);
-				othertmp->data.number = num;
+				while (check_number(numb) == false || check_unique(numb, Head) == false)
+				{
+					cin.clear();
+					cin.ignore(cin.rdbuf()->in_avail());
+					cout << "Номер рейса должен содержать 4 цифры и быть уникальным: " << endl;
+					cin >> numb;
+				}
+				othertmp->data.number = stoi(numb);
 				break;
 			}
 			case 2:
 			{
 				string _destination;
-				cout << "Введите новый пункт назначения: " << endl;
-				cin >> _destination;
-				check_destination(_destination);
+				getline(cin >> ws, _destination);
+				while (check_destination(_destination) == false)
+				{
+					cin.clear();
+					cin.ignore(cin.rdbuf()->in_avail());
+					cout << "Пункт назначения не должен содержать цифр и специальных знаков: " << endl;
+					getline(cin >> ws, _destination);
+				}
 				othertmp->data.destination = _destination;
 				break;
 			}
 			case 3:
 			{
-				cout << "\nВыберите тип самолета: \n1) Boeing 777-300ER\n2) Boeing 737-800\n3) Airbus A350-900\n4) Airbus А330-300\n5) Airbus А321\n";
-				cin >> p_t;
-				check_option(p_t);
-				switch (p_t)
+				cout << "\nВведите имя нужного типа самолета:\n";
+				ShowPlanes(Start);
+				getline(cin >> ws, type);
+				while (check_planes_unique(type, Start) == true)
 				{
-				case 1:
-					othertmp->data.plane_type = "Boeing 777-300ER";
-					break;
-				case 2:
-					othertmp->data.plane_type = "Boeing 737-800";
-					break;
-				case 3:
-					othertmp->data.plane_type = "Airbus A350-900";
-					break;
-				case 4:
-					othertmp->data.plane_type = "Airbus А330-300";
-					break;
-				case 5:
-					othertmp->data.plane_type = "Airbus А321";
-					break;
+					cin.clear();
+					cin.ignore(cin.rdbuf()->in_avail());
+					cout << "Такой самолет отсутсвует в базе, повторите ввод: " << endl;
+					getline(cin >> ws, type);
 				}
+				othertmp->data.plane_type = type;
 				break;
 			}
 			case 0:
@@ -271,7 +313,7 @@ void EditFlight(Flight Plane, Node*& Head)
 	return;
 }
 
-void DeleteFlight(Flight Plane, Node*& Head, Node*& Tail) 
+void DeleteFlight(Flight Plane, Node*& Head, Node*& Tail)
 {
 	if (!Head)
 	{
@@ -283,7 +325,14 @@ void DeleteFlight(Flight Plane, Node*& Head, Node*& Tail)
 	int num;
 	cout << "\nВведите номер рейса, который нужно удалить: ";
 	cin >> numb;
-	num = check_number(numb);
+	while (check_number(numb) == false)
+	{
+		cin.clear();
+		cin.ignore(cin.rdbuf()->in_avail());
+		cout << "Номер рейса должен содержать 4 цифры: " << endl;
+		cin >> numb;
+	}
+	num = stoi(numb);
 	Node* tmp = Head;
 	while (tmp)
 	{
@@ -301,6 +350,11 @@ void DeleteFlight(Flight Plane, Node*& Head, Node*& Tail)
 			{
 				tmp->prev->next = tmp->next;
 			}
+			if (tmp->data.number == Tail->data.number)
+			{
+				Tail->prev->next = NULL;
+				Tail = Tail->prev;
+			}
 			del = 1;
 			cout << endl << "Запись удалена" << endl << endl;
 			return;
@@ -314,7 +368,7 @@ void DeleteFlight(Flight Plane, Node*& Head, Node*& Tail)
 	return;
 }
 
-void ClearList(Flight Plane, Node*& Head, Node*& Tail) 
+void ClearList(Flight Plane, Node*& Head, Node*& Tail)
 {
 	if (!Head)
 	{
@@ -342,7 +396,7 @@ void SortByNumber(Flight Plane, Node*& Head)
 	Node* tmp = Head;
 	bool flag = 1;
 	int k;
-	do 
+	do
 	{
 		k = 0;
 		while (tmp->next != NULL)
@@ -363,7 +417,7 @@ void SortByNumber(Flight Plane, Node*& Head)
 		}
 		tmp = Head;
 	} while (flag != 0);
-	cout  << "\nРейсы отсортированы по номеру.\n\n";
+	cout << "\nРейсы отсортированы по номеру.\n\n";
 }
 
 void SearchDestinations(Flight Plane, Node*& Head)
@@ -377,10 +431,17 @@ void SearchDestinations(Flight Plane, Node*& Head)
 	Node* tmp = Head;
 	string des;
 	cout << "\nВведите пункт назначения: ";
-	cin >> des;
+	getline(cin >> ws, des);
+	while (check_destination(des) == false)
+	{
+		cin.clear();
+		cin.ignore(cin.rdbuf()->in_avail());
+		cout << "Пункт назначения не должен содержать цифр и специальных знаков: " << endl;
+		getline(cin >> ws, des);
+	}
 	while (tmp)
 	{
-		if (tmp->data.destination == des) 
+		if (tmp->data.destination == des)
 		{
 			cout << "\nНомер рейса : " << tmp->data.number << "  Пункт назначения : " << tmp->data.destination << "  Тип самолёта : " << tmp->data.plane_type << "\n";
 			flag = 1;
@@ -400,7 +461,7 @@ void ShowFlights(Flight Plane, Node*& Head, Node*& Tail)
 	}
 	Node* tmp = Head;
 	cout << "\n| " << " Номер рейса " << " | " << "Пункт прибытия" << " | " << "    Тип самолёта    " << " |\n" << "+---------------+----------------+----------------------+\n";
-	while (tmp) 
+	while (tmp)
 	{
 		cout << "| " << setw(13) << tmp->data.number << " | " << setw(14) << tmp->data.destination << " | "
 			<< setw(20) << tmp->data.plane_type << " |" << endl;
@@ -427,111 +488,53 @@ void ReadHelp(Flight Plane, Node*& Head, Node*& Tail)
 	}
 }
 
-void Read(Flight Plane, Node*& Head, Node*& Tail, string inpath)
+void Read(Flight Plane, Node*& Head, Node*& Tail, Planes*& Start, string inpath)
 {
-	Node* tmp = Head;
+	bool flag;
 	ifstream read_file;
-	read_file.open(inpath + ".txt");
-	string str, num, dest, typ;
-	string Boeing1 = "Boeing 777-300ER",
-		Boeing2 = "Boeing 737-800",
-		Airbus1 = "Airbus A350-900",
-		Airbus2 = "Airbus А330-300",
-		Airbus3 = "Airbus А321";
-	Flight obj;
-	int x;
+	read_file.open(inpath);
+	string num, dest, typ;
 	if (!read_file.is_open())
 	{
 		cout << "Файл не существует." << endl;
 		return;
 	}
-	do
+	while (read_file.good())
 	{
-		getline(read_file, str);
+		flag = 0;
+		getline(read_file, num, '|');
+		if (num.length() == 0) continue;
+		size_t pos;
+		while (((pos = num.find('\n')) != string::npos))
+			num.erase(pos, 1);
 
-		if (str.size() == 0)
-			continue;
+		if (check_number(num) == false || check_unique(num, Head) == false || ((pos = num.find(';')) != string::npos)) flag = 1;
+	
+		getline(read_file >> ws, dest, '|');
+		if (check_destination(dest) == false) flag = 1;
+		
+		getline(read_file >> ws, typ, ';');
+		if (check_planes_unique(typ, Start) == true) flag = 1;
 
-		int stick = 0;
-		int dot = 0;
-		int ind = 0;
-		while (ind < str.size())
+		if (flag == 0) 
 		{
-			if (str[ind] == '|')
-			{
-				stick++;
-			}
-			if (str[ind] == ';')
-			{
-				dot++;
-			}
-			ind++;
+			Plane.number = stoi(num);
+			Plane.destination = dest;
+			Plane.plane_type = typ;
+			ReadHelp(Plane, Head, Tail);
+			num.clear();
+			dest.clear();
+			typ.clear();
 		}
-		if (stick != 2 || dot != 1)
+		else 
 		{
-			ind = 0;
-			str.clear();
+			cout << "Рейс " << num << " не был добавлен, так как имеет ошибки в полях\n";
 			num.clear();
 			dest.clear();
 			typ.clear();
 			continue;
 		}
-
-		x = 0;
-		while (str[x] != '|')
-		{
-			num += str[x];
-			x++;
-		}
-		if (num.size() < 4 || num.size() > 4 || (num.find_first_not_of("0123456789") == string::npos) == false)
-		{
-			cout << "Рейс " << str << " не был добавлен, так как имеет ошибки в полях\n";
-			num.clear();
-			dest.clear();
-			typ.clear();
-			continue;
-		}
-
-		x++;
-		while (str[x] != '|')
-		{
-			dest += str[x];
-			x++;
-		}
-		if ((dest.find_first_not_of("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя-") == string::npos) == false)
-		{
-			cout << "Рейс " << str << " не был добавлен, так как имеет ошибки в полях\n";
-			num.clear();
-			dest.clear();
-			typ.clear();
-			continue;
-		}
-
-		x++;
-		while (str[x] != ';')
-		{
-			typ += str[x];
-			x++;
-		}
-		if (typ != Boeing1 && typ != Boeing2 && typ != Airbus1 && typ != Airbus2 && typ != Airbus3)
-		{
-			cout << "Рейс " << str << " не был добавлен, так как имеет ошибки в полях\n";
-			num.clear();
-			dest.clear();
-			typ.clear();
-			continue;
-		}
-		x++;
-
-		Plane.number = stoi(num);
-		Plane.destination = dest;
-		Plane.plane_type = typ;
-		ReadHelp(Plane, Head, Tail);
-		str.clear();
-		num.clear();
-		dest.clear();
-		typ.clear();
-	} while (!read_file.eof());
+	} 
 	cout << endl << "База данных загружена" << endl << endl;
 	read_file.close();
 }
@@ -542,7 +545,7 @@ void Record(Flight Plane, Node*& Head, string& outpath, string& inpath)
 	ofstream record_file;
 	if (outpath != inpath)
 	{
-		record_file.open(outpath + ".txt", ofstream::app);
+		record_file.open(outpath, ofstream::app);
 		if (!record_file.is_open())
 		{
 			cout << "Не удалось открыть файл.\n";
@@ -561,7 +564,7 @@ void Record(Flight Plane, Node*& Head, string& outpath, string& inpath)
 	}
 	else
 	{
-		record_file.open(outpath + ".txt");
+		record_file.open(outpath);
 		if (!record_file.is_open())
 		{
 			cout << "Не удалось открыть файл.\n";
@@ -581,16 +584,86 @@ void Record(Flight Plane, Node*& Head, string& outpath, string& inpath)
 	record_file.close();
 }
 
-int main() 
+void PlanesHelp(string plane_type, Planes*& Start)
+{
+	Planes* NewElem = new Planes;
+	NewElem->Next = NULL;
+	NewElem->plane = plane_type;
+	if (Start == NULL) Start = NewElem;
+	else
+	{
+		Planes* tmp = Start;
+		while (tmp->Next != NULL)
+		{
+			tmp = tmp->Next;
+		}
+		tmp->Next = NewElem;
+	}
+}
+
+void CreatePlanes(Planes*& Start)
+{
+	ofstream base;
+	base.open("Planes.txt");
+	if (!base.is_open())
+	{
+		cout << "Не удалось создать файл.\n";
+		return;
+	}
+	else 
+	{
+		for (int i = 0; i < sizeof(planes) / sizeof(planes[0]); i++)
+		{
+			base << planes[i] << ";" << endl;
+		}
+	}
+	base.close();
+}
+
+void AddPlanes(Planes*& Start)
+{
+	bool flag;
+	string type;
+	ifstream planesbase;
+	planesbase.open("Planes.txt");
+	if (!planesbase.is_open()) 
+	{
+		cout << "Не удалось найти файл с базой самолетов (Planes.txt), файл будет создан автоматически\n";
+		CreatePlanes(Start);
+	}
+	planesbase.close();
+	planesbase.open("Planes.txt");
+	while (planesbase.good()) 
+	{
+		flag = 0;
+		getline(planesbase >> ws, type, ';');
+		if (type.length() == 0) continue;
+		size_t pos;
+		while (((pos = type.find('\n')) != string::npos))
+			type.erase(0, pos + 1);
+		if (check_planes_unique(type, Start) == false || check_plane(type) == false)
+		{
+			type.clear();
+			continue;
+		}
+		PlanesHelp(type, Start);
+		type.clear();
+	}
+	planesbase.close();
+}
+
+int main()
 {
 	setlocale(LC_ALL, "ru");
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
+	Planes* Start = NULL;
 	Node* Head = NULL;
 	Node* Tail = NULL;
 	Flight Plane;
 	string outpath, inpath = "";
-	int menu;
+	int menu, choice;
+	AddPlanes(Start);
 
 	do
 	{
@@ -604,12 +677,12 @@ int main()
 		{
 		case 1:
 		{
-			AddFlight(Plane, Head, Tail);
+			AddFlight(Plane, Head, Tail, Start);
 			break;
 		}
 		case 2:
 		{
-			EditFlight(Plane, Head);
+			EditFlight(Plane, Head, Start);
 			break;
 		}
 		case 3:
@@ -639,16 +712,23 @@ int main()
 				cout << "В приложении нет таблицы для сохранения.\n";
 				break;
 			}
-			cout << "Введите имя файла: ";
+			cout << "Введите полный путь до файла: ";
 			cin >> outpath;
 			Record(Plane, Head, outpath, inpath);
 			break;
 		}
 		case 8:
 		{
-			cout << "Введите имя файла: ";
+			cout << "Хотите перед этим очистить таблицу в приложении?\nВведите 1, если хотите очистить и 0, если нет: ";
+			cin >> choice;
+			check_choice(choice);
+			if (choice == 1)
+			{
+				ClearList(Plane, Head, Tail);
+			}
+			cout << "\nВведите полный путь до файла: ";
 			cin >> inpath;
-			Read(Plane, Head, Tail, inpath);
+			Read(Plane, Head, Tail, Start, inpath);
 			break;
 		}
 		case 9:
